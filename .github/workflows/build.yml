@@ -1,65 +1,51 @@
 on:
- 
   push:
     branches:
       - master
-
+      - Production
+      - Staging
+      - Development
   pull_request:
     branches:
       - master
-
+      - Production
+      - Staging
+      - Development 
 jobs:
-
   build:
-
-    name: BUILD
-
+    name: build
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: CHECKOUT CODE
-      
+      - name: checkout code
         uses: actions/checkout@v2
 
-      - name: Install node 16
-
-        uses: actions/steup-node@v1
-
+      - name: install node 16
+        uses: actions/setup-node@v1
         with:
-          node-version: 16.x
-      - name: INSTALL NPM DEPENDENCIeS
-     
+           node-version: 16.x
+
+      - name: install npm dependencies
         run: npm i
 
-      - name: BUILD PROJECT
+      - name: build project
+        run: npm run build
 
-        run: npm run build  
-
-      - name: UPLOAD ARTIFACT IN ORDER TO DEPLOY
-      
+      - name: upload artifact in order to deploy
         uses: actions/upload-artifact@v2
-
         with:
-        
-          name: production-files
-        
-          path: ./dist
+           name: production-files
+           path: ./dist
 
   deploy:
-    name: DEPLOY
-    runs-on: ubuntu-latest
-    needs: build 
+    - name: deploy
+      uses: actions/download-artifact@v2
+      with:
+        name: production-files
+        path: ./dist
 
-   steps: 
-     - name: Download artifact
-       uses: actions/download-artifact@v2
-       with:
-         name: production-files
-         path: ./dist
-
-     - name: Deploy to gh pages
-       uses: peacerisis/actions-gh-pages@v3
-       with: 
-        github_tokken: ${{ secrets.GH_ACCESS_TOKKEN }}
-        publish_dir: ./dist  
+    - name: deploy to gh pages
+      uses: peacerisis/actions-gh-pages@v3
+      with:
+         github_tokken: ${{ secrets.GH_ACCESS_TOKKEN }}               
+         publish_dir: ./dist
